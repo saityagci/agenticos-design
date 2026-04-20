@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AgenticOS — Hero Video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #0a0a0a; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; }
+  #root { position: absolute; inset: 0; }
+  @keyframes caret-blink { 50% { opacity: 0; } }
+  @keyframes pulse-fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+  *, *::before, *::after { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="animations.jsx"></script>
+<script type="text/babel" src="scenes/scene1_deluge.jsx"></script>
+<script type="text/babel" src="scenes/scene2_classify.jsx"></script>
+<script type="text/babel" src="scenes/scene3_kanban.jsx"></script>
+<script type="text/babel" src="scenes/scene4_dashboard.jsx"></script>
+<script type="text/babel" src="scenes/scene5_finale.jsx"></script>
+
+<script type="text/babel">
+const DURATION = 36;
+
+function TimestampLabel() {
+  // Tag root data-screen-label with current timestamp once per second
+  const t = useTime();
+  React.useEffect(() => {
+    const root = document.getElementById('video-root');
+    if (root) {
+      const secs = Math.floor(t);
+      root.setAttribute('data-screen-label', `t=${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`);
+    }
+  }, [Math.floor(t)]);
+  return null;
+}
+
+function SceneTransitions() {
+  // Quick crossfades between scenes — subtle overlay flashes at handoff points
+  const t = useTime();
+  const handoffs = [4.8, 9.8, 17.8, 25.8, 31.8];
+  let flashOpacity = 0;
+  for (const h of handoffs) {
+    const d = Math.abs(t - h);
+    if (d < 0.3) flashOpacity = Math.max(flashOpacity, (1 - d / 0.3) * 0.08);
+  }
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, pointerEvents: 'none',
+      background: '#f1f5f9', opacity: flashOpacity, mixBlendMode: 'overlay',
+    }}/>
+  );
+}
+
+function App() {
+  return (
+    <div id="video-root" data-screen-label="t=00:00" style={{ position: 'absolute', inset: 0 }}>
+      <Stage
+        width={1920}
+        height={1080}
+        duration={DURATION}
+        background="linear-gradient(160deg, #080c14 0%, #0f1520 50%, #0a1628 100%)"
+        persistKey="agenticos-hero"
+        fullscreen
+      >
+        {/* Ambient gradient orbs — global atmosphere */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', left: -200, top: -100,
+            width: 800, height: 800, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(59,130,246,0.18), transparent 65%)',
+            filter: 'blur(60px)',
+          }}/>
+          <div style={{
+            position: 'absolute', right: -200, top: 200,
+            width: 700, height: 700, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(6,214,160,0.14), transparent 65%)',
+            filter: 'blur(60px)',
+          }}/>
+          <div style={{
+            position: 'absolute', left: '40%', bottom: -300,
+            width: 900, height: 900, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.10), transparent 65%)',
+            filter: 'blur(60px)',
+          }}/>
+        </div>
+
+        <Scene1Deluge />
+        <Scene2Classify />
+        <Scene3Kanban />
+        <Scene4Dashboard />
+        <Scene5Finale />
+        <SceneTransitions />
+        <TimestampLabel />
+      </Stage>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
